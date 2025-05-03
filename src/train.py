@@ -111,4 +111,11 @@ def train_all_genres(data_root="data", epochs=50):
                     genre_name=genre, start_epoch=start_epoch, model_dir=model_dir)
 
 if __name__ == "__main__":
-    train_all_genres(data_root="data", epochs=50)
+    allow_scrape = input("Do you want to scrape songs first? (Only use if dataset 'Data' is empty!) y/n: ").lower().strip()
+    if allow_scrape in answerY:
+        import scrape_songs as scraper
+        scraper.scrape_genres(genres=["rock", "blues", "pop", "jazz"])
+    elif allow_scrape in answerN:
+        train_all_genres(data_root="data", epochs=50)
+    else:
+        print("Wrong Input. Please enter a valid answer.")
