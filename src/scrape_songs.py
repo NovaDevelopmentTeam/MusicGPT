@@ -2,6 +2,12 @@ import os
 import subprocess
 import csv
 import json
+import signal
+import sys
+import glob
+
+# Speicher aller begonnenen Downloads
+partial_files = []
 
 def download_song(genre, url, index):
     genre_folder = f"data/{genre}"
@@ -12,7 +18,6 @@ def download_song(genre, url, index):
     try:
         subprocess.run([
             "yt-dlp",
-            "-v",  # Für detaillierte Ausgabe
             "-x", "--audio-format", "mp3",
             "-o", f"{genre_folder}/song{index}.%(ext)s",
             url
@@ -22,55 +27,62 @@ def download_song(genre, url, index):
         print(f"Download failed for: {url}")
         return None
 
+def cleanup_partial_files():
+    print("\nAbbruch erkannt. Unvollständige Dateien werden gelöscht...")
+    for filepath in partial_files:
+        base = os.path.splitext(filepath)[0]
+        for f in glob.glob(base + "*"):
+            try:
+                os.remove(f)
+                print(f"Gelöscht: {f}")
+            except Exception as e:
+                print(f"Fehler beim Löschen von {f}: {e}")
+    print("Aufräumen abgeschlossen.")
+
 def scrape_genres(genres):
     all_files = []
 
-    for genre in genres:
-        # Search for the genre on YouTube
-        search_query = f"{genre} music"
-        search_url = f"https://www.youtube.com/results?search_query={search_query}"
+    try:
+        for genre in genres:
+            search_query = f"{genre} music"
+            search_url = f"https://www.youtube.com/results?search_query={search_query}"
 
-        # Dynamically scrape the first few results
-        try:
+            print(f"Suche nach Genre: {genre}...")
             result = subprocess.run(
                 ["yt-dlp", "-j", "--flat-playlist", search_url],
                 capture_output=True, text=True, check=True
             )
 
-            # Parse the JSON output and extract the URLs
             video_data = result.stdout.splitlines()
             links = []
-            
+
             for line in video_data:
                 try:
-                    # Try to parse JSON and extract the URL if available
                     data = json.loads(line)
                     if 'url' in data:
                         links.append(data['url'])
                 except json.JSONDecodeError:
-                    # Skip lines that can't be parsed as JSON
                     continue
 
-            # Ensure we have unique links by using a set
             links = list(set(links))
 
-            # Download songs based on the links (limiting to 5 songs per genre)
-            for idx, link in enumerate(links[:5]):  # Limit to 5 songs per genre
+            for idx, link in enumerate(links[:5]):
+                genre_folder = f"data/{genre}"
+                partial_filename = f"{genre_folder}/song{idx}"
+                partial_files.append(partial_filename)
                 path = download_song(genre, link, idx)
                 if path:
                     all_files.append([path])
 
-        except subprocess.CalledProcessError:
-            print(f"Error scraping genre: {genre}")
+    except KeyboardInterrupt:
+        cleanup_partial_files()
+        sys.exit(1)
 
-    # Save to CSV
     with open("song_files.csv", mode="w", newline="") as file:
         writer = csv.writer(file)
         writer.writerow(["file_paths"])
         writer.writerows(all_files)
 
 if __name__ == "__main__":
-    # Example genres
     genres = ["rock", "blues", "pop", "jazz"]
-
     scrape_genres(genres)
