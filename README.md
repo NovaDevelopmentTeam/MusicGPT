@@ -9,6 +9,12 @@ cd MusicGPT
 python train.py
 ```
 
+to generate music, just use:
+
+```py
+model.generate()
+```
+
 Make sure you have Python and the required dependencies installed.
 You can install them with:
 
