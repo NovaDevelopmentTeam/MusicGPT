@@ -1,15 +1,21 @@
-# MusicGPT
-NovaGPT-Audio
+# 🎵 MusicGPT (NovaGPT-Audio)
+## 💡 Purpose
+MusicGPT (NovaGPT-Audio) is designed to make AI-generated music accessible to everyone — especially users who don't want to spend money or deal with complex tools.
 
-## Purpose of NovaGPT-Audio
-It's purpose is to let normal people who don't want to spend money on making songs create ai generated music easier
-
-## usage:
+## 🚀 Usage
 ```cmd
 git clone https://github.com/NovaDevelopmentTeam/MusicGPT
-cd C:\Windows\System32\MusicGPT
+cd MusicGPT
 python train.py
 ```
 
-## DISCLAIMER!
-I am not responsible for any copyright claims or problems. You are responsible to use only copyright-free or self-created songs for the datasets.
+Make sure you have Python and the required dependencies installed.
+You can install them with:
+
+```cmd
+pip install -r requirements.txt
+```
+
+## ⚠️ Disclaimer
+We are not responsible for any copyright claims or issues arising from the use of this tool.
+Only use copyright-free or self-created songs for your training datasets.
